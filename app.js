@@ -1,12 +1,13 @@
 import zodUrlValidation from './zod/url.js'
 import { formatQ } from './func/formatQ.js'
 export class Q {
-  constructor({ URL }) {
+  constructor({ URL, header = 'JSON' }) {
     const {
       data: url,
       success: urlSucces,
       error: urlError
     } = zodUrlValidation(URL)
+    this.header = header
     if (urlSucces) {
       this.URL = url
       this.urlSucces = urlSucces
@@ -14,8 +15,9 @@ export class Q {
       console.log(new Error("You've to type a base URL"))
     }
   }
-  getQuery({ path = '', header = 'JSON', format }) {
+  getQ({ path = '', header = '', format }) {
     let [data, isSucces, isError, isLoading] = [undefined, false, false, false]
+
     const url = this.URL
       ? this.URL[this.URL.length - 1] !== '/' && path[0] !== '/'
         ? `${this.URL}/${path}`
@@ -23,12 +25,17 @@ export class Q {
         ? `${this.URL.slice(0, -1)}/${path.slice(1)}`
         : this.URL + path
       : path
+
     if (this.urlSucces) {
-      let info = new Promise((res, rej) =>
+      data = new Promise((res, rej) =>
         fetch(url, {
           headers: {
             'Content-Type':
-              header.toLowerCase() === 'json' ? 'application/json' : ''
+              header.toLowerCase() === 'json'
+                ? 'application/json'
+                : this.header.toLowerCase() === 'json'
+                ? 'application/json'
+                : ''
           }
         })
           .then((response) => {
@@ -40,16 +47,18 @@ export class Q {
           })
           .then((json) => {
             if (format) {
-              res(formatQ(format, json))
+              let info = formatQ(format, json)
+              if (info) {
+                res(info)
+              }
             } else {
               res(json)
             }
           })
+          .catch((e) => {
+            rej(new Error(e))
+          })
       )
-      info.then(info => {
-        data = info
-        console.log(info)
-      })
     }
     return {
       data,
@@ -58,8 +67,9 @@ export class Q {
       isLoading
     }
   }
-  getQueries({ paths = [], header = '' }) {
+  getQs({ URLs = [], header = '' }) {
     let [data, isSucces, isError, isLoading] = [undefined, false, false, false]
+    
 
     return {
       data,
@@ -71,13 +81,15 @@ export class Q {
 }
 
 const q = new Q({ URL: 'https://pokeapi.co/api/v2/' })
-const { data } = q.getQuery({
+const { data } = q.getQ({
   path: '/pokemon/ditto',
   format: { name: (param) => param.name }
 })
 
-console.log(data)
-
-// data.then((data) => {
-//   console.log(data)
-// })
+data
+  .then((info) => {
+    console.log(info)
+  })
+  .catch((e) => {
+    console.log(e)
+  })
