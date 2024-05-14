@@ -1,5 +1,7 @@
-export function formatQ(schema: object, data: object) {
-  let obQ = {}
+import { format } from "../../global.js"
+
+export function formatQ(schema: format, data: object) {
+  let obQ: Record<string, any> = {}
   for (let param in schema) {
     try {
       if (typeof schema[param] === 'function') {

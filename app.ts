@@ -1,6 +1,7 @@
 import zodUrlValidation from './src/zod/url.ts'
 import getQFunc from './src/func/getQFunc.ts'
 import getQsFunc from './src/func/getQsFunc.ts'
+import { format } from './global.js'
 
 interface QObjectParams {
   URL?: string
@@ -9,18 +10,18 @@ interface QObjectParams {
 
 interface GetQParams {
   path: string
-  header: string
-  format: { [key: string]: (param: any) => any }
+  header?: string
+  format?: format
 }
 
 interface GetQsParams {
   paths: string[]
-  header: string
-  format: { [key: string]: (param: any) => any }
+  header?: string
+  format?: format
 }
 
 export class Q {
-  URL: string | undefined
+  URL?: string
   header: string
   urlSuccess: boolean | undefined
   constructor({ URL, header = 'JSON' }: QObjectParams) {
@@ -37,8 +38,7 @@ export class Q {
       console.log(new Error('You must to type a base URL'))
     }
   }
-  getQ({ path = '', header = '', format }: GetQParams) {
-    let data: undefined | Promise<unknown> = undefined
+  getQ<DataType>({ path = '', header = '', format }: GetQParams) {
     // CREATE A VALIDATION IF THE DEV TYPE AN URL IN path PARAM
     // AND THE URL ON THE Q OBJECT ALREADY EXIST
     //
@@ -52,17 +52,17 @@ export class Q {
         : this.URL + path
       : path
 
-    if (this.urlSuccess) {
-      data = getQFunc({
-        url: url,
-        header: header,
-        QHeader: this.header,
-        format: format
-      })
-    }
+    // if (this.urlSuccess) {
+    // }
+    let data = getQFunc<DataType>({
+      url: url,
+      header: header,
+      QHeader: this.header,
+      format: format
+    })
     return {
       data,
-      refetch: ({ rHeader, rFormat }) =>
+      refetch: ({ rHeader, rFormat }: { rHeader?: string; rFormat?: format }) =>
         getQFunc({
           url: url,
           header: rHeader ? rHeader : header,
@@ -71,15 +71,14 @@ export class Q {
         })
     }
   }
-  getQs({ paths = [], header = '', format }: GetQsParams) {
-    let data: undefined | Promise<unknown> = undefined
+  getQs<DataType>({ paths = [], header = '', format }: GetQsParams) {
     let urls: (string | undefined)[] = []
 
     // CREATE A VALIDATION IF THE DEV TYPE AN URL IN path PARAM
     // AND THE URL ON THE Q OBJECT ALREADY EXIST
     //
     //  TO-DO
-
+    
     try {
       if (typeof paths === 'object') {
         let URLS_PROTOTYPE = Array.from({ length: paths.length }, (_, i) => {
@@ -110,7 +109,7 @@ export class Q {
       console.log(e)
     }
 
-    data = getQsFunc({
+    let data = getQsFunc<DataType>({
       urls: urls,
       header: header,
       QHeader: this.header,
@@ -118,7 +117,7 @@ export class Q {
     })
     return {
       data,
-      refetch: ({ rHeader, rFormat }) =>
+      refetch: ({ rHeader, rFormat }: { rHeader?: string; rFormat?: format }) =>
         getQsFunc({
           urls: urls,
           header: rHeader ? rHeader : header,
@@ -127,16 +126,22 @@ export class Q {
         })
     }
   }
-  mutateQ({ path = '', method = 'POST', body = {}, header = '', format }) {
+  mutateQ<DataType>({
+    path = '',
+    method = 'POST',
+    body = {},
+    header = '',
+    format
+  }) {
     let data = undefined
 
     // const { data, success, error } = zodUrlValidation(path)
 
-    const fetchingDataPost = ({ body }) => {}
+    const fetchingDataPost = ({ body, format }) => {}
 
     return {
       data,
-      refetch: ({ rBody, rFormat }) =>
+      refetch: ({ rBody, rFormat }: { rBody?: object; rFormat?: format }) =>
         fetchingDataPost({
           body: rBody ? rBody : body,
           format: rFormat ? rFormat : format
@@ -149,24 +154,32 @@ const q = new Q({ URL: 'https://pokeapi.co/api/v2/' })
 
 const { data: datas, refetch: reGet } = q.getQs({
   paths: ['/pokemon/1', '/pokemon/4', '/pokemon/7'],
-  format: { name: (param) => param.name }
+  format: (param: { name: string }) => {
+    return { name: param.name }
+  }
 })
-const { data, refetch: reGets } = q.getQ({
+const { data, refetch: reGets } = q.getQ<{ name: string }>({
   path: '/pokemon/151',
-  format: { "name": (param) => param.name }
+  format: (param) => {
+    return { name: param.name }
+  }
 })
 
 const rdata = reGet({
-  rFormat: {
-    name: (param) => param.name,
-    id: (param) => param.id
+  rFormat: (param) => {
+    return {
+      name: param.name,
+      id: param.id
+    }
   }
 })
 
 const rdatas = reGets({
-  rFormat: {
-    name: (param) => param.name,
-    id: (param) => param.id
+  rFormat: (param) => {
+    return {
+      name: param.name,
+      id: param.id
+    }
   }
 })
 

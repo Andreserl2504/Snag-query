@@ -1,20 +1,21 @@
+import { format } from '../../global.js'
 import { formatQ } from './formatQ.ts'
 
 type GetQFuncParam = {
   url: string
   header: string
-  QHeader: string
-  format: { [key: string]: (param: any) => any }
+  QHeader: string | undefined
+  format?: format
 } 
 
-export default ({ url, header, QHeader, format }: GetQFuncParam) =>
-  new Promise((res, rej) =>
+export default <DataType>({ url, header, QHeader, format }: GetQFuncParam) =>
+  new Promise<DataType>((res, rej) =>
     fetch(url, {
       headers: {
         'Content-Type':
           !!header && header.toLowerCase() === 'json'
             ? 'application/json'
-            : QHeader.toLowerCase() === 'json'
+            : typeof QHeader === 'string' && QHeader.toLowerCase() === 'json'
             ? 'application/json'
             : ''
       }
@@ -28,7 +29,7 @@ export default ({ url, header, QHeader, format }: GetQFuncParam) =>
       })
       .then((json) => {
         if (format) {
-          const info = formatQ(format, json)
+          const info: DataType = format(json)
           if (info) {
             res(info)
           }
