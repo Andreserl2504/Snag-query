@@ -1,4 +1,4 @@
-export function formatQ(schema, data) {
+export function formatQ(schema: object, data: object) {
   let obQ = {}
   for (let param in schema) {
     try {

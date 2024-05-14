@@ -6,12 +6,17 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "fetch": "node app.js"
+    "start": "node --loader ts-node/esm app.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "zod": "3.23.8"
+  },
+  "devDependencies": {
+    "@tsconfig/node16": "^16.1.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
   }
 }
