@@ -1,5 +1,4 @@
 import { format } from '../../global.js'
-import { formatQ } from './formatQ.ts'
 
 type getQsFuncParams = {
   urls: string[]
@@ -31,7 +30,7 @@ export default <DataType>({ urls = [], header, QHeader, format }: getQsFuncParam
           })
           .then((json) => {
             if (format) {
-              const info:DataType = format(json)
+              const info = format(json)
               if (info) {
                 return info
               }

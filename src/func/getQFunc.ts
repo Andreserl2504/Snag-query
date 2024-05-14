@@ -1,12 +1,11 @@
 import { format } from '../../global.js'
-import { formatQ } from './formatQ.ts'
 
 type GetQFuncParam = {
   url: string
   header: string
   QHeader: string | undefined
   format?: format
-} 
+}
 
 export default <DataType>({ url, header, QHeader, format }: GetQFuncParam) =>
   new Promise<DataType>((res, rej) =>

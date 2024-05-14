@@ -1,7 +1,7 @@
 import zodUrlValidation from './src/zod/url.ts'
 import getQFunc from './src/func/getQFunc.ts'
 import getQsFunc from './src/func/getQsFunc.ts'
-import { format } from './global.js'
+import type { format } from './global.d.ts'
 
 interface QObjectParams {
   URL?: string
@@ -15,8 +15,9 @@ interface GetQParams {
 }
 
 interface GetQsParams {
-  paths: string[]
+  paths?: string[]
   header?: string
+  createPathsFn?: () => string[]
   format?: format
 }
 
@@ -71,16 +72,19 @@ export class Q {
         })
     }
   }
-  getQs<DataType>({ paths = [], header = '', format }: GetQsParams) {
-    let urls: (string | undefined)[] = []
-
+  getQs<DataType>({
+    paths = [],
+    header = '',
+    format,
+    createPathsFn
+  }: GetQsParams) {
     // CREATE A VALIDATION IF THE DEV TYPE AN URL IN path PARAM
     // AND THE URL ON THE Q OBJECT ALREADY EXIST
     //
     //  TO-DO
-    
+
     try {
-      if (typeof paths === 'object') {
+      if (Array.isArray(paths) && paths.length > 0) {
         let URLS_PROTOTYPE = Array.from({ length: paths.length }, (_, i) => {
           return this.URL
             ? this.URL[this.URL.length - 1] !== '/' && paths[i][0] !== '/'
@@ -90,7 +94,7 @@ export class Q {
               : this.URL + paths[i]
             : paths[i]
         })
-        urls = Array.from({ length: URLS_PROTOTYPE.length }, (_, i) => {
+        let urls = Array.from({ length: URLS_PROTOTYPE.length }, (_, i) => {
           const {
             data: url,
             success: urlSuccess,
@@ -99,31 +103,46 @@ export class Q {
           if (urlSuccess) {
             return url
           } else if (urlError) {
-            throw new Error('Something went wrong :(')
+            throw new Error('You must to create an array with URLs')
           }
         })
+
+        if (!urls.some((url: string | undefined) => url === undefined)) {
+          let data = getQsFunc<DataType>({
+            urls: urls,
+            header: header,
+            QHeader: this.header,
+            format: format
+          })
+          return {
+            data,
+            refetch: ({
+              rHeader,
+              rFormat
+            }: {
+              rHeader?: string
+              rFormat?: format
+            }) =>
+              getQsFunc({
+                urls: urls,
+                header: rHeader ? rHeader : header,
+                QHeader: this.header,
+                format: rFormat ? rFormat : format
+              })
+          }
+        }
       } else {
-        throw new Error('You must to add urls to array')
+        throw new Error('Something went wrong :(')
       }
     } catch (e) {
-      console.log(e)
+      console.error(e)
     }
-
-    let data = getQsFunc<DataType>({
-      urls: urls,
-      header: header,
-      QHeader: this.header,
-      format: format
-    })
-    return {
-      data,
-      refetch: ({ rHeader, rFormat }: { rHeader?: string; rFormat?: format }) =>
-        getQsFunc({
-          urls: urls,
-          header: rHeader ? rHeader : header,
-          QHeader: this.header,
-          format: rFormat ? rFormat : format
-        })
+    try {
+      if (createPathsFn !== undefined) {
+        let urls = createPathsFn()
+      }
+    } catch (e) {
+      console.error(e)
     }
   }
   mutateQ<DataType>({
@@ -150,15 +169,26 @@ export class Q {
   }
 }
 
+
+
+
+
+
+
+
+
+
+
+
 const q = new Q({ URL: 'https://pokeapi.co/api/v2/' })
 
-const { data: datas, refetch: reGet } = q.getQs({
+const { data: datas, refetch: reGet } = q.getQs<{ name: string; id: number }>({
   paths: ['/pokemon/1', '/pokemon/4', '/pokemon/7'],
   format: (param: { name: string }) => {
     return { name: param.name }
   }
 })
-const { data, refetch: reGets } = q.getQ<{ name: string }>({
+const { data, refetch: reGets } = q.getQ<{ name: string; id: number }>({
   path: '/pokemon/151',
   format: (param) => {
     return { name: param.name }
