@@ -2,6 +2,12 @@ import { string } from 'zod'
 
 const schema = string().url().optional()
 
-export default (url) => {
+const requieredSchema = string().url()
+
+export const zodUrlValidation = (url: string | undefined) => {
   return schema.safeParse(url)
+}
+
+export const zodUrlValidationRequiered = (url: string) => {
+  return requieredSchema.safeParse(url)
 }

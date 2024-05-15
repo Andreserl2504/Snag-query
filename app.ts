@@ -1,4 +1,4 @@
-import zodUrlValidation from './src/zod/url.ts'
+import { zodUrlValidation, zodUrlValidationRequiered } from './src/zod/url.ts'
 import getQFunc from './src/func/getQFunc.ts'
 import getQsFunc from './src/func/getQsFunc.ts'
 import type { format } from './global.d.ts'
@@ -26,18 +26,19 @@ export class Q {
   header: string
   urlSuccess: boolean | undefined
   constructor({ URL, header = 'JSON' }: QObjectParams) {
-    const {
-      data: url,
-      success: urlSuccess,
-      error: urlError
-    } = zodUrlValidation(URL)
-    this.header = header
-    if (urlSuccess) {
-      this.URL = url
-      this.urlSuccess = urlSuccess
-    } else if (urlError) {
-      console.log(new Error('You must to type a base URL'))
+    if (URL) {
+      const {
+        data: url,
+        success: urlSuccess
+      } = zodUrlValidation(URL)
+      if (urlSuccess) {
+        this.URL = url
+        this.urlSuccess = urlSuccess
+      } else {
+        console.log(new Error('You must to type a base URL'))
+      }
     }
+    this.header = header
   }
   getQ<DataType>({ path = '', header = '', format }: GetQParams) {
     // CREATE A VALIDATION IF THE DEV TYPE AN URL IN path PARAM
@@ -63,10 +64,10 @@ export class Q {
     })
     return {
       data,
-      refetch: ({ rHeader, rFormat }: { rHeader?: string; rFormat?: format }) =>
-        getQFunc({
+      refetch: <refetchData>({ rFormat }: { rFormat?: format }) =>
+        getQFunc<refetchData | DataType>({
           url: url,
-          header: rHeader ? rHeader : header,
+          header: header,
           QHeader: this.header,
           format: rFormat ? rFormat : format
         })
@@ -84,7 +85,11 @@ export class Q {
     //  TO-DO
 
     try {
-      if (Array.isArray(paths) && paths.length > 0) {
+      if (
+        Array.isArray(paths) &&
+        paths.length > 0 &&
+        !paths.some((url) => url === undefined)
+      ) {
         let URLS_PROTOTYPE = Array.from({ length: paths.length }, (_, i) => {
           return this.URL
             ? this.URL[this.URL.length - 1] !== '/' && paths[i][0] !== '/'
@@ -94,41 +99,40 @@ export class Q {
               : this.URL + paths[i]
             : paths[i]
         })
-        let urls = Array.from({ length: URLS_PROTOTYPE.length }, (_, i) => {
-          const {
-            data: url,
-            success: urlSuccess,
-            error: urlError
-          } = zodUrlValidation(URLS_PROTOTYPE[i])
-          if (urlSuccess) {
-            return url
-          } else if (urlError) {
-            throw new Error('You must to create an array with URLs')
-          }
-        })
+        if (!URLS_PROTOTYPE.some((url) => url === undefined)) {
+          const urls = Array.from({ length: URLS_PROTOTYPE.length }, (_, i) => {
+            const {
+              data: url,
+              success: urlSuccess
+            } = zodUrlValidationRequiered(URLS_PROTOTYPE[i])
 
-        if (!urls.some((url: string | undefined) => url === undefined)) {
-          let data = getQsFunc<DataType>({
-            urls: urls,
-            header: header,
-            QHeader: this.header,
-            format: format
+            if (urlSuccess) {
+              if (url) {
+                return url
+              } else {
+                throw new Error('')
+              }
+            } else {
+              throw new Error('You must to create an array with URLs')
+            }
           })
-          return {
-            data,
-            refetch: ({
-              rHeader,
-              rFormat
-            }: {
-              rHeader?: string
-              rFormat?: format
-            }) =>
-              getQsFunc({
-                urls: urls,
-                header: rHeader ? rHeader : header,
-                QHeader: this.header,
-                format: rFormat ? rFormat : format
-              })
+          if (!urls.some((url) => url === undefined)) {
+            let data = getQsFunc<DataType>({
+              urls: urls,
+              header: header,
+              QHeader: this.header,
+              format: format
+            })
+            return {
+              data,
+              refetch: ({ rFormat }: { rFormat?: format }) =>
+                getQsFunc({
+                  urls: urls,
+                  header: header,
+                  QHeader: this.header,
+                  format: rFormat ? rFormat : format
+                })
+            }
           }
         }
       } else {
@@ -169,17 +173,6 @@ export class Q {
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
 const q = new Q({ URL: 'https://pokeapi.co/api/v2/' })
 
 const { data: datas, refetch: reGet } = q.getQs<{ name: string; id: number }>({
@@ -195,8 +188,8 @@ const { data, refetch: reGets } = q.getQ<{ name: string; id: number }>({
   }
 })
 
-const rdata = reGet({
-  rFormat: (param) => {
+const rdata = reGet<{ name: string; id: number }>({
+  rFormat: (param: { name: string; id: number }) => {
     return {
       name: param.name,
       id: param.id
