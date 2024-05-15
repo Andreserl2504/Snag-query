@@ -1,4 +1,4 @@
-import { format } from '../../global.js'
+import type { format } from '../../global.d.ts'
 
 type GetQFuncParam = {
   url: string
@@ -23,7 +23,7 @@ export default <DataType>({ url, header, QHeader, format }: GetQFuncParam) =>
         if (response.ok) {
           return response.json()
         } else {
-          throw new Error("Something went wrong :'(")
+          rej(new Error("Something went wrong :'("))
         }
       })
       .then((json) => {

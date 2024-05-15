@@ -1,4 +1,4 @@
-import { format } from '../../global.js'
+import type { format } from '../../global.d.ts'
 
 type getQsFuncParams = {
   urls: string[]
@@ -39,7 +39,7 @@ export default <DataType>({ urls = [], header, QHeader, format }: getQsFuncParam
             }
           })
           .catch((e) => {
-            console.log(e)
+            console.error(e)
           })
       }
     })
