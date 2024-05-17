@@ -1,11 +1,11 @@
-import type { format, fetchMethod, BodyType } from '../../global.d.ts'
+import type { format, fetchMethod, BodyType } from '../../Types.js'
 
 type MutateQParams = {
   url: string
   header: string
   QHeader: string
   method: fetchMethod
-  body: BodyType
+  body?: BodyType
   format?: format
 }
 
@@ -35,7 +35,7 @@ export default <DataType>({
             ? 'application/json'
             : ''
       },
-      body: JSON.stringify(body)
+      body: body ? JSON.stringify(body) : JSON.stringify({})
     })
       .then((response) => {
         if (response.ok) {

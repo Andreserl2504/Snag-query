@@ -1,9 +1,9 @@
-import type { format } from '../../global.d.ts'
+import type { format } from '../../Types.js'
 
 type GetQFuncParam = {
   url: string
   header: string
-  QHeader: string | undefined
+  QHeader: string
   format?: format
 }
 

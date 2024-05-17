@@ -1,4 +1,4 @@
-import type { format } from '../../global.d.ts'
+import type { format } from '../../Types.js'
 
 type getQsFuncParams = {
   urls: string[]
