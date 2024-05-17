@@ -16,6 +16,7 @@
       }
     },
     "compilerOptions": {
+      "strictPropertyInitialization": false,
       "lib": ["es2023", "dom"],
       "module": "node16",
       "target": "es2022",
