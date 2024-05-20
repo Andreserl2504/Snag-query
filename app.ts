@@ -55,25 +55,29 @@ export class Q {
       }
     } else {
       const url = formatURL(this.URL, path)
-      let data = getQFunc<DataType>({
-        url: url,
-        header: header,
-        QHeader: this.header,
-        format: format
-      })
-      return {
-        data,
-        refetch: <refetchData>({ rFormat }: { rFormat?: format }) =>
-          getQFunc<refetchData | DataType>({
-            url: url,
-            header: header,
-            QHeader: this.header,
-            format: rFormat ? rFormat : format
-          })
+      const { data: urlValidation, success } = zodUrlValidationRequiered(url)
+      if (success) {
+        const data = getQFunc<DataType>({
+          url: urlValidation,
+          header: header,
+          QHeader: this.header,
+          format: format
+        })
+        return {
+          data,
+          refetch: <refetchData>({ rFormat }: { rFormat?: format }) =>
+            getQFunc<refetchData | DataType>({
+              url: url,
+              header: header,
+              QHeader: this.header,
+              format: rFormat ? rFormat : format
+            })
+        }
+      } else {
+        throw new Error("Something went wrong :'(")
       }
     }
   }
-
   getQs<DataType>({
     paths = [],
     header = '',
