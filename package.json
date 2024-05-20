@@ -1,5 +1,5 @@
 {
-  "name": "snag",
+  "name": "snag-query",
   "version": "1.0.0-b",
   "description": "Get the data you need with less code",
   "type": "module",
