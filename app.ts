@@ -1,21 +1,21 @@
 import { zodUrlValidation, zodUrlValidationRequiered } from './src/zod/url.ts'
-import getQFunc from './src/func/getQFunc.ts'
-import mutateQ from './src/func/mutateQ.ts'
-import getQsFunc from './src/func/getQsFunc.ts'
+import getSnagFunc from './src/func/getSnagFunc.ts'
+import mutateSnag from './src/func/mutateSnag.ts'
+import getSnagsFunc from './src/func/getSnagsFunc.ts'
 import formatURL from './src/func/formatURL.ts'
 import type {
   BodyType,
-  GetQParams,
-  GetQsParams,
-  MutateQParams,
-  QObjectParams,
+  GetSnagsParams,
+  GetSnagParams,
+  MutateSnagParams,
+  SnagObjectParams,
   format
 } from './Types.js'
 
-export class Q {
+export class Snag {
   URL?: string
   header: string
-  constructor({ URL, header = 'JSON' }: QObjectParams) {
+  constructor({ URL, header = 'JSON' }: SnagObjectParams) {
     try {
       if (header.toLowerCase() === 'json') {
         this.header = header
@@ -34,10 +34,10 @@ export class Q {
       console.error(e)
     }
   }
-  getQ<DataType>({ path = '', header = '', format }: GetQParams) {
+  getSnag<DataType>({ path = '', header = '', format }: GetSnagParams) {
     const { data: urlValidation, success } = zodUrlValidationRequiered(path)
     if (success) {
-      const data = getQFunc<DataType>({
+      const data = getSnagFunc<DataType>({
         url: urlValidation,
         header: header,
         QHeader: this.header,
@@ -46,7 +46,7 @@ export class Q {
       return {
         data,
         refetch: <refetchData>({ rFormat }: { rFormat?: format }) =>
-          getQFunc<refetchData | DataType>({
+          getSnagFunc<refetchData | DataType>({
             url: urlValidation,
             header: header,
             QHeader: this.header,
@@ -57,7 +57,7 @@ export class Q {
       const url = formatURL(this.URL, path)
       const { data: urlValidation, success } = zodUrlValidationRequiered(url)
       if (success) {
-        const data = getQFunc<DataType>({
+        const data = getSnagFunc<DataType>({
           url: urlValidation,
           header: header,
           QHeader: this.header,
@@ -66,7 +66,7 @@ export class Q {
         return {
           data,
           refetch: <refetchData>({ rFormat }: { rFormat?: format }) =>
-            getQFunc<refetchData | DataType>({
+            getSnagFunc<refetchData | DataType>({
               url: url,
               header: header,
               QHeader: this.header,
@@ -78,12 +78,12 @@ export class Q {
       }
     }
   }
-  getQs<DataType>({
+  getSnags<DataType>({
     paths = [],
     header = '',
     format,
     createPathsFn
-  }: GetQsParams) {
+  }: GetSnagsParams) {
     try {
       const urlValidation = Array.from({ length: paths.length }, (_, i) => {
         const { success } = zodUrlValidationRequiered(paths[i])
@@ -91,7 +91,7 @@ export class Q {
       })
 
       if (!urlValidation.some((isUrl) => isUrl === false)) {
-        let data = getQsFunc<DataType>({
+        let data = getSnagsFunc<DataType>({
           urls: paths,
           header: header,
           QHeader: this.header,
@@ -100,7 +100,7 @@ export class Q {
         return {
           data,
           refetch: <refetchData>({ rFormat }: { rFormat?: format }) =>
-            getQsFunc<refetchData | DataType>({
+            getSnagsFunc<refetchData | DataType>({
               urls: paths,
               header: header,
               QHeader: this.header,
@@ -136,7 +136,7 @@ export class Q {
                 }
               }
             )
-            const data = getQsFunc<DataType>({
+            const data = getSnagsFunc<DataType>({
               urls: urls,
               header: header,
               QHeader: this.header,
@@ -145,7 +145,7 @@ export class Q {
             return {
               data,
               refetch: <refetchData>({ rFormat }: { rFormat?: format }) =>
-                getQsFunc<refetchData | DataType>({
+                getSnagsFunc<refetchData | DataType>({
                   urls: urls,
                   header: header,
                   QHeader: this.header,
@@ -169,7 +169,7 @@ export class Q {
             throw new Error('Create a function to make an array')
           }
         })
-        const data = getQsFunc<DataType>({
+        const data = getSnagsFunc<DataType>({
           urls: urlsValidation,
           header: header,
           QHeader: this.header,
@@ -178,7 +178,7 @@ export class Q {
         return {
           data,
           refetch: <refetchData>({ rFormat }: { rFormat?: format }) =>
-            getQsFunc<refetchData | DataType>({
+            getSnagsFunc<refetchData | DataType>({
               urls: urls,
               header: header,
               QHeader: this.header,
@@ -194,17 +194,17 @@ export class Q {
     throw new Error('Create URLs within the array')
   }
 
-  mutateQ<DataType>({
+  mutateSnag<DataType>({
     path = '',
     method = 'POST',
     header = ''
-  }: MutateQParams) {
+  }: MutateSnagParams) {
     try {
       const { data: urlValidation, success } = zodUrlValidationRequiered(path)
       if (success) {
         return {
           mutate: ({ body, format }: { body?: BodyType; format?: format }) =>
-            mutateQ<DataType>({
+            mutateSnag<DataType>({
               url: urlValidation,
               header: header,
               QHeader: this.header,
@@ -219,7 +219,7 @@ export class Q {
         if (success) {
           return {
             mutate: ({ body, format }: { body?: BodyType; format?: format }) =>
-              mutateQ<DataType>({
+              mutateSnag<DataType>({
                 url: urlValidation,
                 header: header,
                 QHeader: this.header,

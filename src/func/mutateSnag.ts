@@ -1,6 +1,6 @@
 import type { format, fetchMethod, BodyType } from '../../Types.js'
 
-type MutateQParams = {
+type MutateSnagParams = {
   url: string
   header: string
   QHeader: string
@@ -16,7 +16,7 @@ export default <DataType>({
   method,
   body,
   format
-}: MutateQParams) =>
+}: MutateSnagParams) =>
   new Promise<DataType>((res, rej) =>
     fetch(url, {
       method:

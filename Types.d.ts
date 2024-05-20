@@ -12,25 +12,25 @@ export type fetchMethod =
   | 'PATCH'
   | 'patch'
 
-export interface QObjectParams {
+export interface SnagObjectParams {
   URL?: string
   header?: string
 }
 
-export interface GetQParams {
+export interface GetSnagParams {
   path: string
   header?: string
   format?: format
 }
 
-export interface GetQsParams {
+export interface GetSnagsParams {
   paths?: string[]
   header?: string
   createPathsFn?: () => string[]
   format?: format
 }
 
-export interface MutateQParams {
+export interface MutateSnagParams {
   path: string
   header?: string
   method?: fetchMethod
