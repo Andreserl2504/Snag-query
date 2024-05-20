@@ -1,6 +1,6 @@
 {
   "name": "snag-query",
-  "version": "1.0.0.01",
+  "version": "1.0.01",
   "description": "Get the data you need with less code",
   "type": "module",
   "main": "app.ts",
