@@ -1,6 +1,6 @@
 {
   "name": "q-query",
-  "version": "1.0.0 beta",
+  "version": "1.0.0-b",
   "description": "Get the data you need with less code",
   "type": "module",
   "main": "app.ts",
