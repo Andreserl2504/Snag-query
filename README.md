@@ -66,14 +66,14 @@ The difference with `getSnag()` method is that you can make much fetch at once.
 `createPathsFn`: if you don't have an `Array` with paths within, you can create it in this param.
 
 ``` ts
-	const { data, refetch } = snag.getSnags<ValueWillReturnType>({
-	paths: ['/pokemon/1','/pokemon/4','/pokemon/7'],
-	format: (pokemon: JSONFormAPIType) => {
-		return {
-			name: pokemon.name,
-			id: pokemon.id
-		}
+const { data, refetch } = snag.getSnags<ValueWillReturnType>({
+paths: ['/pokemon/1','/pokemon/4','/pokemon/7'],
+format: (pokemon: JSONFormAPIType) => {
+	return {
+		name: pokemon.name,
+		id: pokemon.id
 	}
+}
 })
 ```
 
