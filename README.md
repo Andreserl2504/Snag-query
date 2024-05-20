@@ -1,5 +1,18 @@
 [GitHub Repository](https://github.com/Andreserl2504/Snag-query)
 
+# Install
+
+### npm:
+
+```
+npm i snag-query
+```
+
+### pnpm:
+```
+pnpm i snag-query
+```
+
 # HOW FETCH
 
 Create a new object `Snag` and write the general config for that object.
