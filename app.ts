@@ -89,8 +89,7 @@ export class Snag {
         const { success } = zodUrlValidationRequiered(paths[i])
         return success
       })
-
-      if (!urlValidation.some((isUrl) => isUrl === false)) {
+      if (!urlValidation.some((isUrl) => !isUrl) && urlValidation.length > 0) {
         let data = getSnagsFunc<DataType>({
           urls: paths,
           header: header,
@@ -109,84 +108,80 @@ export class Snag {
         }
       } else if (
         urlValidation.some((isUrl) => isUrl === true) &&
-        urlValidation.some((isUrl) => isUrl === false)
+        urlValidation.some((isUrl) => isUrl === false) &&
+        urlValidation.length > 0
       ) {
         throw new Error('You must to type URls or paths in array, no both')
       }
 
-      if (paths) {
-        if (
-          Array.isArray(paths) &&
-          paths.length > 0 &&
-          !paths.some((url) => url === undefined)
-        ) {
-          let URLS_PROTOTYPE = Array.from({ length: paths.length }, (_, i) => {
-            return formatURL(this.URL, paths[i])
-          })
-          if (!URLS_PROTOTYPE.some((url) => url === undefined)) {
-            const urls = Array.from(
-              { length: URLS_PROTOTYPE.length },
-              (_, i) => {
-                const { data: url, success: urlSuccess } =
-                  zodUrlValidationRequiered(URLS_PROTOTYPE[i])
-                if (urlSuccess) {
-                  return url
-                } else {
-                  throw new Error('You must to create an array with URLs')
-                }
-              }
-            )
-            const data = getSnagsFunc<DataType>({
-              urls: urls,
-              header: header,
-              QHeader: this.header,
-              format: format
-            })
-            return {
-              data,
-              refetch: <refetchData>({ rFormat }: { rFormat?: format }) =>
-                getSnagsFunc<refetchData | DataType>({
-                  urls: urls,
-                  header: header,
-                  QHeader: this.header,
-                  format: rFormat ? rFormat : format
-                })
+      if (
+        paths.length > 0 &&
+        Array.isArray(paths) &&
+        !paths.some((url) => url === undefined)
+      ) {
+        let URLS_PROTOTYPE = Array.from({ length: paths.length }, (_, i) => {
+          return formatURL(this.URL, paths[i])
+        })
+        if (!URLS_PROTOTYPE.some((url) => url === undefined)) {
+          const urls = Array.from({ length: URLS_PROTOTYPE.length }, (_, i) => {
+            const { data: url, success: urlSuccess } =
+              zodUrlValidationRequiered(URLS_PROTOTYPE[i])
+            if (urlSuccess) {
+              return url
+            } else {
+              throw new Error('You must to create an array with URLs')
             }
+          })
+          const data = getSnagsFunc<DataType>({
+            urls: urls,
+            header: header,
+            QHeader: this.header,
+            format: format
+          })
+          return {
+            data,
+            refetch: <refetchData>({ rFormat }: { rFormat?: format }) =>
+              getSnagsFunc<refetchData | DataType>({
+                urls: urls,
+                header: header,
+                QHeader: this.header,
+                format: rFormat ? rFormat : format
+              })
+          }
+        }
+      } else {
+        if (createPathsFn) {
+          const paths = createPathsFn()
+          const urls = Array.from({ length: paths.length }, (_, i) =>
+            formatURL(this.URL, paths[i])
+          )
+          const urlsValidation = Array.from({ length: urls.length }, (_, i) => {
+            const { data, success } = zodUrlValidationRequiered(urls[i])
+            if (success) {
+              return data
+            } else {
+              throw new Error('Create a function to make an array')
+            }
+          })
+          const data = getSnagsFunc<DataType>({
+            urls: urlsValidation,
+            header: header,
+            QHeader: this.header,
+            format: format
+          })
+          return {
+            data,
+            refetch: <refetchData>({ rFormat }: { rFormat?: format }) =>
+              getSnagsFunc<refetchData | DataType>({
+                urls: urls,
+                header: header,
+                QHeader: this.header,
+                format: rFormat ? rFormat : format
+              })
           }
         } else {
           throw new Error('Something went wrong :(')
         }
-      }
-
-      if (createPathsFn !== undefined) {
-        let urls = createPathsFn()
-
-        const urlsValidation = Array.from({ length: urls.length }, (_, i) => {
-          const { data, success } = zodUrlValidationRequiered(urls[i])
-          if (success) {
-            return data
-          } else {
-            throw new Error('Create a function to make an array')
-          }
-        })
-        const data = getSnagsFunc<DataType>({
-          urls: urlsValidation,
-          header: header,
-          QHeader: this.header,
-          format: format
-        })
-        return {
-          data,
-          refetch: <refetchData>({ rFormat }: { rFormat?: format }) =>
-            getSnagsFunc<refetchData | DataType>({
-              urls: urls,
-              header: header,
-              QHeader: this.header,
-              format: rFormat ? rFormat : format
-            })
-        }
-      } else {
-        throw new Error('Create a function to make an array')
       }
     } catch (e) {
       console.error(e)
@@ -235,3 +230,23 @@ export class Snag {
     }
   }
 }
+
+const snag = new Snag({
+  URL: 'https://pokeapi.co/api/v2/pokemon/'
+})
+
+const { data:data1 } = snag.getSnags({
+  createPathsFn: () => Array.from({ length: 3 }, (_, i) => (i + 1).toString())
+})
+
+const { data:data2 } = snag.getSnags({
+  paths:['charmander', 'pikachu', 'cyndaquil']
+})
+
+data1.then(info => {
+  console.log(info)
+})
+
+data2.then(info => {
+  console.log(info)
+})
