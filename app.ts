@@ -230,23 +230,3 @@ export class Snag {
     }
   }
 }
-
-const snag = new Snag({
-  URL: 'https://pokeapi.co/api/v2/pokemon/'
-})
-
-const { data:data1 } = snag.getSnags({
-  createPathsFn: () => Array.from({ length: 3 }, (_, i) => (i + 1).toString())
-})
-
-const { data:data2 } = snag.getSnags({
-  paths:['charmander', 'pikachu', 'cyndaquil']
-})
-
-data1.then(info => {
-  console.log(info)
-})
-
-data2.then(info => {
-  console.log(info)
-})

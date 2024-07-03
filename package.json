@@ -1,12 +1,12 @@
 {
   "name": "snag-query",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Get the data you need with less code",
   "type": "module",
   "main": "app.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node --loader ts-node/esm app.ts"
+    "start": "ts-node/esm app.ts"
   },
   "keywords": [],
   "author": "andreserl2504",
